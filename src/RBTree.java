@@ -22,11 +22,11 @@ public class RBTree
 	/**
 	 * public class RBNode
 	 */
-	public static class RBNode // TODO Impliment this entire thing
+	public static class RBNode
 	{
 		private int key;
 		private String value;
-		private Color color; //
+		private Color color;
 		private RBNode left, right, parent;
 
 		public RBNode(int key, String value, RBNode parent)
@@ -73,6 +73,15 @@ public class RBTree
 		}
 	}
 
+	private RBNode root;
+	private int size;
+
+	public RBTree()
+	{
+		this.root = null;
+		this.size = 0;
+	}
+
 	/**
 	 * public RBNode getRoot()
 	 *
@@ -81,7 +90,7 @@ public class RBTree
 	 */
 	public RBNode getRoot()
 	{
-		return null; // to be replaced by student code
+		return this.root;
 	}
 
 	/**
@@ -92,7 +101,7 @@ public class RBTree
 	 */
 	public boolean empty()
 	{
-		return false; // to be replaced by student code
+		return this.root == null;
 	}
 
 	/**
@@ -103,7 +112,18 @@ public class RBTree
 	 */
 	public String search(int k)
 	{
-		return "42"; // to be replaced by student code
+		RBNode current = this.root;
+		while (current != null && current.key != k)
+		{
+			if (current.key > k)
+				current = current.left;
+			else
+				current = current.right;
+		}
+		if (current == null)
+			return null;
+
+		return current.value;
 	}
 
 	/**
@@ -116,7 +136,12 @@ public class RBTree
 	 */
 	public int insert(int k, String v)
 	{
-		return 42; // to be replaced by student code
+		if (this.search(k) == null)
+			return -1;
+		return 42; /*
+					 * TODO implement insert (with color switches and flips)
+					 * don't forget to increment the size variable!
+					 */
 	}
 
 	/**
@@ -129,7 +154,10 @@ public class RBTree
 	 */
 	public int delete(int k)
 	{
-		return 42; // to be replaced by student code
+		return 42; /*
+					 * TODO implement delete (with color switches and flips)
+					 * don't forget to increment the size variable!
+					 */
 	}
 
 	/**
@@ -140,7 +168,12 @@ public class RBTree
 	 */
 	public String min()
 	{
-		return "42"; // to be replaced by student code
+		if (this.empty())
+			return null;
+		RBNode current = this.root;
+		while (current.left != null)
+			current = current.left;
+		return current.value;
 	}
 
 	/**
@@ -151,7 +184,12 @@ public class RBTree
 	 */
 	public String max()
 	{
-		return "42"; // to be replaced by student code
+		if (this.empty())
+			return null;
+		RBNode current = this.root;
+		while (current.right != null)
+			current = current.right;
+		return current.value;
 	}
 
 	/**
@@ -162,8 +200,8 @@ public class RBTree
 	 */
 	public int[] keysToArray()
 	{
-		int[] arr = new int[42]; // to be replaced by student code
-		return arr; // to be replaced by student code
+		int[] arr = new int[this.size];
+		return arr; // TODO implement this!
 	}
 
 	/**
@@ -174,8 +212,8 @@ public class RBTree
 	 */
 	public String[] valuesToArray()
 	{
-		String[] arr = new String[42]; // to be replaced by student code
-		return arr; // to be replaced by student code
+		String[] arr = new String[this.size]; 
+		return arr; // TODO implement this!
 	}
 
 	/**
@@ -187,7 +225,7 @@ public class RBTree
 	 */
 	public int size()
 	{
-		return 42; // to be replaced by student code
+		return this.size;
 	}
 
 	/**
