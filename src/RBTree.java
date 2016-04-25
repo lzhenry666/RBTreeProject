@@ -34,6 +34,8 @@ public class RBTree
 			this.key = key;
 			this.value = value;
 			this.parent = parent;
+			this.left = null;
+			this.right = null;
 			this.color = Color.Red;
 		}
 
