@@ -172,9 +172,9 @@ public class RBTree
 				{
 					if (this.isRightChild(currentNode.parent)) // Cases 2+3
 					{
-						RBNode B = currentNode, A = B.parent, C = A.parent;
 						if (this.isRightChild(currentNode)) // Case 2
 						{
+							RBNode B = currentNode, A = B.parent, C = A.parent;
 							C.left = B;
 							B.parent = C;
 							A.right = B.left;
@@ -183,19 +183,27 @@ public class RBTree
 							B.left = A;
 							A.parent = B;
 						}
+						RBNode B = currentNode, C = B.parent, D = C.parent;
 						// Case 3
+
+						boolean r = this.isRightChild(C);
 						C.left = B.right;
 						if (B.right != null)
 							B.right.parent = C;
 						B.left = C;
 						C.parent = B;
+						if (r)
+							D.right = B;
+						else
+							D.left = B;
+						B.parent = D;
 						B.color = Color.Black;
 						C.color = Color.Red;
 					} else // Cases 2+3 - mirrored
 					{
-						RBNode B = currentNode, A = B.parent, C = A.parent;
 						if (!this.isRightChild(currentNode)) // Case 2 - mirror
 						{
+							RBNode B = currentNode, A = B.parent, C = A.parent;
 							C.right = B;
 							B.parent = C;
 							A.left = B.right;
@@ -205,11 +213,18 @@ public class RBTree
 							A.parent = B;
 						}
 						// Case 3 - mirror
+						RBNode B = currentNode, C = B.parent, D = C.parent;
+						boolean r = this.isRightChild(C);
 						C.right = B.left;
 						if (B.left != null)
 							B.left.parent = C;
 						B.right = C;
 						C.left = B;
+						if (r)
+							D.right = B;
+						else
+							D.left = B;
+						B.parent = D;
 						B.color = Color.Black;
 						C.color = Color.Red;
 					}
@@ -219,10 +234,6 @@ public class RBTree
 			} else
 				return changeCount;
 		}
-		// return 42;
-		/*
-		 * TODO balancing and stuff
-		 */
 	}
 
 	/**
