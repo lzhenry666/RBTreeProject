@@ -136,12 +136,18 @@ public class RBTree
 	 */
 	public int insert(int k, String v)
 	{
-		if (this.search(k) == null)
+		RBNode nearest = this.findParentNode(k);
+		if (nearest.key == k)
 			return -1;
-		return 42; /*
-					 * TODO implement insert (with color switches and flips)
-					 * don't forget to increment the size variable!
-					 */
+		RBNode newNode = new RBNode(k, v, nearest);
+		if (nearest.key < k)
+			nearest.left = newNode;
+		else
+			nearest.right = newNode;
+		return 42;
+		/*
+		 * TODO balancing and stuff
+		 */
 	}
 
 	/**
@@ -212,7 +218,7 @@ public class RBTree
 	 */
 	public String[] valuesToArray()
 	{
-		String[] arr = new String[this.size]; 
+		String[] arr = new String[this.size];
 		return arr; // TODO implement this!
 	}
 
@@ -245,4 +251,37 @@ public class RBTree
 	 * this file, not in another file.
 	 */
 
+	/**
+	 * public int findNearestNode(int k)
+	 *
+	 * Returns the node under which a node with key k needs to be inserted, or,
+	 * if a node with key k already exists, the node with key k.
+	 *
+	 * precondition: none postcondition: none
+	 */
+	private RBNode findParentNode(int k)
+	{
+		RBNode current = this.root;
+		if (current == null)
+			return current;
+		while (true)
+		{
+			if (current.key == k)
+				return current;
+			if (current.key < k)
+			{
+				if (current.left == null)
+					return current;
+				else
+					current = current.left;
+			} else
+			{
+				if (current.right == null)
+					return current;
+				else
+					current = current.right;
+			}
+
+		}
+	}
 }
