@@ -73,12 +73,13 @@ public class RBTree
 		}
 	}
 
-	private RBNode root;
+	private RBNode sentinel;
 	private int size;
 
 	public RBTree()
 	{
-		this.root = null;
+		this.sentinel = new RBNode(-1, null, sentinel);
+		this.sentinel.left = this.sentinel;
 		this.size = 0;
 	}
 
@@ -90,7 +91,7 @@ public class RBTree
 	 */
 	public RBNode getRoot()
 	{
-		return this.root;
+		return this.sentinel.right;
 	}
 
 	/**
@@ -101,7 +102,7 @@ public class RBTree
 	 */
 	public boolean empty()
 	{
-		return this.root == null;
+		return this.getRoot() == null;
 	}
 
 	/**
@@ -112,7 +113,7 @@ public class RBTree
 	 */
 	public String search(int k)
 	{
-		RBNode current = this.root;
+		RBNode current = this.getRoot();
 		while (current != null && current.key != k)
 		{
 			if (current.key > k)
@@ -136,6 +137,7 @@ public class RBTree
 	 */
 	public int insert(int k, String v)
 	{
+		// Insertion:
 		RBNode nearest = this.findParentNode(k);
 		if (nearest.key == k)
 			return -1;
@@ -144,7 +146,80 @@ public class RBTree
 			nearest.left = newNode;
 		else
 			nearest.right = newNode;
-		return 42;
+		size++;
+		// Fixing:
+		int changeCount = 0;
+		RBNode currentNode = newNode;
+		while (true)
+		{
+			if (currentNode.parent.color == Color.Red)
+			{
+				if (currentNode.parent.parent.left.color == currentNode.parent.parent.left.color) // Case
+																									// 1
+				{
+					currentNode.parent.parent.left.color = Color.Black;
+					currentNode.parent.parent.right.color = Color.Black;
+					currentNode = currentNode.parent.parent;
+					currentNode.color = Color.Red;
+					changeCount += 3;
+					if (currentNode == this.getRoot())
+					{
+						currentNode.color = Color.Black;
+						changeCount += 1;
+					}
+
+				} else
+				{
+					if (this.isRightChild(currentNode.parent)) // Cases 2+3
+					{
+						RBNode B = currentNode, A = B.parent, C = A.parent;
+						if (this.isRightChild(currentNode)) // Case 2
+						{
+							C.left = B;
+							B.parent = C;
+							A.right = B.left;
+							if (B.left != null)
+								B.left.parent = A;
+							B.left = A;
+							A.parent = B;
+						}
+						// Case 3
+						C.left = B.right;
+						if (B.right != null)
+							B.right.parent = C;
+						B.left = C;
+						C.parent = B;
+						B.color = Color.Black;
+						C.color = Color.Red;
+					} else // Cases 2+3 - mirrored
+					{
+						RBNode B = currentNode, A = B.parent, C = A.parent;
+						if (!this.isRightChild(currentNode)) // Case 2 - mirror
+						{
+							C.right = B;
+							B.parent = C;
+							A.left = B.right;
+							if (B.right != null)
+								B.right.parent = A;
+							B.right = A;
+							A.parent = B;
+						}
+						// Case 3 - mirror
+						C.right = B.left;
+						if (B.left != null)
+							B.left.parent = C;
+						B.right = C;
+						C.left = B;
+						B.color = Color.Black;
+						C.color = Color.Red;
+					}
+					changeCount += 2;
+					return changeCount;
+				}
+			} else
+				return changeCount;
+		}
+		// return 42;
 		/*
 		 * TODO balancing and stuff
 		 */
@@ -176,7 +251,7 @@ public class RBTree
 	{
 		if (this.empty())
 			return null;
-		RBNode current = this.root;
+		RBNode current = this.getRoot();
 		while (current.left != null)
 			current = current.left;
 		return current.value;
@@ -192,7 +267,7 @@ public class RBTree
 	{
 		if (this.empty())
 			return null;
-		RBNode current = this.root;
+		RBNode current = this.getRoot();
 		while (current.right != null)
 			current = current.right;
 		return current.value;
@@ -261,7 +336,7 @@ public class RBTree
 	 */
 	private RBNode findParentNode(int k)
 	{
-		RBNode current = this.root;
+		RBNode current = this.getRoot();
 		if (current == null)
 			return current;
 		while (true)
@@ -283,5 +358,10 @@ public class RBTree
 			}
 
 		}
+	}
+
+	private boolean isRightChild(RBNode node)
+	{
+		return node.parent.right == node;
 	}
 }
