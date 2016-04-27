@@ -43,6 +43,7 @@ public class RBTree
 		private RBNode left;
 		private RBNode right;
 		private RBNode parent;
+		private int size;
 
 		/**
 		 * Creates a new Red Black node with the given attributes, no children
@@ -60,6 +61,7 @@ public class RBTree
 			this.setLeft(null);
 			this.setRight(null);
 			this.setNodeColor(NodeColor.RED);
+			this.size = 1;
 		}
 
 		/**
@@ -145,7 +147,6 @@ public class RBTree
 	}
 
 	private RBNode sentinel;
-	private int size;
 
 	public RBTree()
 	{
@@ -153,7 +154,7 @@ public class RBTree
 		this.sentinel.setLeft(this.sentinel);
 		this.sentinel.setParent(sentinel);
 		this.sentinel.setNodeColor(NodeColor.BLACK);
-		this.size = 0;
+		this.sentinel.size = 0;
 	}
 
 	/**
@@ -214,7 +215,7 @@ public class RBTree
 		{
 			this.sentinel.right = new RBNode(k, v, this.sentinel);
 			this.sentinel.right.setNodeColor(NodeColor.BLACK);
-			this.size++;
+			this.getRoot().size++;
 			return 1;
 		}
 		if (nearest.getKey() == k)
@@ -224,7 +225,12 @@ public class RBTree
 			nearest.setRight(newNode);
 		else
 			nearest.setLeft(newNode);
-		size++;
+		RBNode parent = newNode.getParent();
+		while (parent != this.sentinel) // Increase size of all parents
+		{
+			parent.size++;
+			parent = parent.getParent();
+		}
 		// Fixing:
 		int changeCount = 0;
 		RBNode currentNode = newNode;
@@ -265,6 +271,13 @@ public class RBTree
 								B.getLeft().setParent(A);
 							B.setLeft(A);
 							A.setParent(B);
+
+							int as = A.size;
+							B.size = as;
+							A.size--;
+							if (B.getRight() != null)
+								A.size -= B.getRight().size;
+
 							case2happened = true;
 						}
 						// Case 3
@@ -283,6 +296,14 @@ public class RBTree
 						else
 							D.setLeft(B);
 						B.setParent(D);
+
+						int cs = C.size;
+						B.size = cs;
+						C.size -= (1 + B.left.size); // No need to check if null
+														// since B must have a
+														// left child in case 3
+														// - A
+
 						B.setNodeColor(NodeColor.BLACK);
 						C.setNodeColor(NodeColor.RED);
 					} else // Cases 2+3 - mirrored
@@ -298,6 +319,13 @@ public class RBTree
 								B.getRight().setParent(A);
 							B.setRight(A);
 							A.setParent(B);
+
+							int as = A.size;
+							B.size = as;
+							A.size--;
+							if (B.getLeft() != null)
+								A.size -= B.getLeft().size;
+
 							case2happened = true;
 						}
 						// Case 3 - mirror
@@ -316,6 +344,14 @@ public class RBTree
 						else
 							D.setLeft(B);
 						B.setParent(D);
+
+						int cs = C.size;
+						B.size = cs;
+						C.size -= (1 + B.right.size); // No need to check if
+														// null since B must
+														// have a right child in
+														// case 3 - A
+
 						B.setNodeColor(NodeColor.BLACK);
 						C.setNodeColor(NodeColor.RED);
 					}
@@ -380,7 +416,7 @@ public class RBTree
 			 * to the deleted node's color, so the missing color is the
 			 * successors's color.
 			 */
-			RBNode successor = getSuccessor(deleted);
+			RBNode successor = getSuccessorInSub(deleted);
 			missingNodeColor = successor.getNodeColor();
 
 			fixNode = successor.getRight();
@@ -410,7 +446,8 @@ public class RBTree
 			successor.setNodeColor(deleted.getNodeColor());
 		}
 
-		size--;
+		if (!this.empty())
+			this.getRoot().size--;
 
 		if (missingNodeColor == NodeColor.BLACK)
 		{
@@ -460,7 +497,7 @@ public class RBTree
 	 */
 	public int[] keysToArray()
 	{
-		int[] arr = new int[size];
+		int[] arr = new int[this.size()];
 		int index = 0;
 
 		RBNode current = getRoot();
@@ -518,7 +555,7 @@ public class RBTree
 	 */
 	public String[] valuesToArray()
 	{
-		String[] arr = new String[size];
+		String[] arr = new String[this.size()];
 		int index = 0;
 
 		RBNode current = getRoot();
@@ -577,7 +614,9 @@ public class RBTree
 	 */
 	public int size()
 	{
-		return this.size;
+		if (this.empty())
+			return 0;
+		return this.getRoot().size;
 	}
 
 	/**
@@ -589,7 +628,21 @@ public class RBTree
 	 */
 	public int rank(int k)
 	{
-		return 42; // TODO Implement this!
+		RBNode currentNode = this.findGEQNode(k);
+		if (currentNode == null) // Either tree is empty or there is no GEQ node
+									// - k is bigger or equal to every key in
+									// the tree
+			return this.size();
+		int total = 0;
+		boolean shouldAdd = true;
+		while (currentNode != this.sentinel)
+		{
+			if (shouldAdd && currentNode.left != null)
+				total += currentNode.left.size;
+			shouldAdd = this.isRightChild(currentNode);
+			currentNode = currentNode.parent;
+		}
+		return total;
 	}
 
 	/**
@@ -694,6 +747,31 @@ public class RBTree
 		return null;
 	}
 
+	/**
+	 * returns the node with the highest key that is greater or equal to k if it
+	 * exists, else returns null.
+	 *
+	 * @param k
+	 *            The key of the node to be searched
+	 * @return The node with the highest key that is greater or equal to k if it
+	 *         exists, else null
+	 */
+	private RBNode findGEQNode(int k)
+	{
+		RBNode parent = this.findParentNode(k);
+		if (parent == null || parent.key >= k)
+			return parent;
+		else
+			return getSuccessor(parent);
+	}
+
+	/*
+	 * returns weather the RBNode node is a right child or not.
+	 * 
+	 * @param node the node that is checked
+	 * 
+	 * @return true if node is a right child of node.parent, false otherwise
+	 */
 	private boolean isRightChild(RBNode node)
 	{
 		assert node != null;
@@ -935,21 +1013,45 @@ public class RBTree
 	}
 
 	/**
+	 * Returns the successor of the given node in it's sub tree.
+	 *
+	 * @param node
+	 *            A node to look for his successor, may be null.
+	 * @return The successor of the node in it's sub tree, or null if node is
+	 *         null.
+	 */
+	private static RBNode getSuccessorInSub(RBNode node)
+	{
+		if (node == null)
+			return null;
+
+		node = node.right;
+		return getMinimum(node);
+	}
+
+	/**
 	 * Returns the successor of the given node.
 	 *
 	 * @param node
 	 *            A node to look for his successor, may be null.
-	 * @return The successor of the node, or null if node is null.
+	 * @return The successor of the node, or null if node is null or node has no
+	 *         successor (is maximum).
 	 */
-	private static RBNode getSuccessor(RBNode node)
+	private RBNode getSuccessor(RBNode node)
 	{
-		if (node == null)
+		RBNode currentNode = getSuccessorInSub(node);
+		if (currentNode != null)
+			return currentNode;
+		else
 		{
+			while (currentNode != this.sentinel)
+			{
+				if (this.isRightChild(currentNode))
+					return currentNode.getParent();
+				currentNode = currentNode.getParent();
+			}
 			return null;
 		}
-
-		node = node.right;
-		return getMinimum(node);
 	}
 
 	/**
