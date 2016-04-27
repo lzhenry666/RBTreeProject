@@ -3,17 +3,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class main {
-	enum Mode {
+public class main
+{
+	enum Mode
+	{
 		Random, IncreasingOrder, DecreasingOrder, IncreaseDecreaseOrder
-	}; 
+	};
 
 	// Choose mode here, or create your own by changing the variable 'key'
 	public static Mode mode = Mode.Random;
 	// Make sure the folder exists
-	public static String insertPath = "InsertFolder/pic";
+	public static String insertPath = "C:\\Users\\navet\\Desktop\\bbb\\b";
 	// Make sure the folder exists
-	public static String deletePath = "DeleteFolder/pic";
+	public static String deletePath = "C:\\Users\\navet\\Desktop\\bbb\\b";
 	// If on random mode - choose a different seed to get a different random
 	// tree
 	public static int randomSeed = 8;
@@ -22,10 +24,11 @@ public class main {
 	// explain
 	// the next ones
 	public static int NUM_OF_NODES = 10;
-	public static boolean saveInsertPictures = false;
-	public static boolean saveDeletePictures = true;
+	public static boolean saveInsertPictures = true;
+	public static boolean saveDeletePictures = false;
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException
+	{
 		RBTree tree = new RBTree();
 
 		Random r = new Random(randomSeed);
@@ -33,43 +36,50 @@ public class main {
 		System.out.println("Insertion starts");
 		int xd = 1366 * 3;
 		int yd = 768 * 3;
-		for (int i = 0; i < NUM_OF_NODES; i++) {
+		for (int i = 0; i < NUM_OF_NODES; i++)
+		{
 			int key3 = NUM_OF_NODES - i;
 			int key1 = r.nextInt(NUM_OF_NODES * 50);
 			int key2 = i;
 			int key4;
-			if (i % 2 == 1) {
+			if (i % 2 == 1)
+			{
 				key4 = i;
-			} else {
+			} else
+			{
 				key4 = NUM_OF_NODES - i;
 			}
 			int key;
-			switch (mode) {
-			case Random:
-				key = key1;
-				break;
-			case IncreasingOrder:
-				key = key2;
-				break;
-			case DecreasingOrder:
-				key = key3;
-				break;
-			case IncreaseDecreaseOrder:
-				key = key4;
-				break;
-			}
+			switch (mode)
+				{
+				case Random:
+					key = key1;
+					break;
+				case IncreasingOrder:
+					key = key2;
+					break;
+				case DecreasingOrder:
+					key = key3;
+					break;
+				case IncreaseDecreaseOrder:
+					key = key4;
+					break;
+				}
 			tree.insert(key1, String.valueOf(i));
-			if (saveInsertPictures) {
+			if (saveInsertPictures)
+			{
 				tree.init_draw(xd, yd);
 				tree.drawtree();
-				try {
+				try
+				{
 					if (i < 10)
 						tree.save(insertPath + "00" + i);
 					else if (i < 100)
 						tree.save(insertPath + "0" + i);
 					else if (i < 1000)
 						tree.save(insertPath + i);
-				} catch (Exception e) {
+				} catch (Exception e)
+				{
 					System.out.println(e.getMessage());
 				}
 			}
@@ -81,21 +91,25 @@ public class main {
 		int[] keys = tree.keysToArray();
 		for (int j = 0; j < keys.length; j++)
 			lst.add(keys[j]);
-		while (tree.size() > 0) {
+		while (tree.size() > 0)
+		{
 			int theChosenOne = r.nextInt(tree.size());
 			tree.delete(lst.get(theChosenOne));
 			lst.remove(theChosenOne);
-			if (saveDeletePictures) {
+			if (saveDeletePictures)
+			{
 				tree.init_draw(xd, yd);
 				tree.drawtree();
-				try {
+				try
+				{
 					if (i < 10)
 						tree.save(deletePath + "00" + i);
 					else if (i < 100)
 						tree.save(deletePath + "0" + i);
 					else if (i < 1000)
 						tree.save(deletePath + i);
-				} catch (Exception e) {
+				} catch (Exception e)
+				{
 					System.out.println(e.getMessage());
 				}
 			}
