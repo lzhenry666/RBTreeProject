@@ -26,6 +26,13 @@ public class RBTree {
         private RBNode right;
         private RBNode parent;
 
+        /**
+         * Creates a new Red Black node with the given attributes, no children and red color.
+         *
+         * @param key
+         * @param value
+         * @param parent
+         */
         public RBNode(int key, String value, RBNode parent) {
             this.setKey(key);
             this.setValue(value);
@@ -33,6 +40,21 @@ public class RBTree {
             this.setLeft(null);
             this.setRight(null);
             this.setColor(Color.RED);
+        }
+
+        /**
+         * Creates a new Red Black node with the given parent, black color, "dummy" key and value, and no children.
+         * Perfect for dummy nodes!
+         *
+         * @param parent
+         */
+        public RBNode(RBNode parent) {
+            this.setKey(-10);
+            this.setValue(null);
+            this.setParent(parent);
+            this.setLeft(null);
+            this.setRight(null);
+            this.setColor(Color.BLACK);
         }
 
         public boolean isRed() {
@@ -145,7 +167,7 @@ public class RBTree {
      */
     public int insert(int k, String v) {
         // Insertion:
-        RBNode nearest = this.findParentNode(k);
+        RBNode nearest = this.findParentNode(k); //TODO: if the parent is null it might throw null pointer exception
         if (nearest.getKey() == k)
             return -1;
         RBNode newNode = new RBNode(k, v, nearest);
@@ -259,9 +281,15 @@ public class RBTree {
         if (deleted.getLeft() == null) {
             fixNode = deleted.getRight();
             transplant(deleted, fixNode);
+            if (fixNode == null) {
+                fixNode = new RBNode(deleted.getParent()); // Creating a dummy node representing the null "node".
+            }
         } else if (deleted.getRight() == null) {
             fixNode = deleted.getLeft();
             transplant(deleted, fixNode);
+            if (fixNode == null) {
+                fixNode = new RBNode(deleted.getParent()); // Creating a dummy node representing the null "node".
+            }
         } else {
             /**
              * If the deleted node has 2 children we replace it with it's successor:
@@ -276,14 +304,21 @@ public class RBTree {
             fixNode = successor.getRight();
             if (successor.getParent() != deleted) {
                 transplant(successor, fixNode);
+                if (fixNode == null) {
+                    fixNode = new RBNode(successor.getParent()); // Creating a dummy node representing the null "node".
+                }
                 successor.setRight(deleted.getRight());
                 successor.getRight().setParent(successor);
+            } else if (fixNode == null) {
+                fixNode = new RBNode(successor); // Creating a dummy node representing the null "node".
             }
             transplant(deleted, successor);
             successor.setLeft(deleted.getLeft());
             successor.getLeft().setParent(successor);
             successor.setColor(deleted.getColor());
         }
+
+        size--;
 
         if (missingColor == Color.BLACK) {
             return fixDelete(fixNode);
@@ -329,8 +364,44 @@ public class RBTree {
      * array if the tree is empty.
      */
     public int[] keysToArray() {
-        int[] arr = new int[this.size];
-        return arr; // TODO implement this!
+        int[] arr = new int[size];
+        int index = 0;
+
+        RBNode current = getRoot();
+        if (current == null) {
+            return arr;
+        }
+
+        int state = 0; // 0 - none done, 1 - left subtree done, 2 - all done. (relative to current)
+        while (current != sentinel) {
+            switch (state) {
+                case 0:
+                    if (current.getLeft() != null) {
+                        current = current.getLeft();
+                    } else {
+                        state = 1;
+                    }
+                    break;
+                case 1:
+                    arr[index++] = current.getKey();
+                    if (current.getRight() != null) {
+                        current = current.getRight();
+                    } else {
+                        state = 2;
+                    }
+                    break;
+                case 2:
+                    if(isRightChild(current)){
+                        state = 2;
+                    }else{
+                        state = 1;
+                    }
+                    current = current.getParent();
+                    break;
+            }
+        }
+
+        return arr;
     }
 
     /**
@@ -340,8 +411,44 @@ public class RBTree {
      * respective keys, or an empty array if the tree is empty.
      */
     public String[] valuesToArray() {
-        String[] arr = new String[this.size];
-        return arr; // TODO implement this!
+        String[] arr = new String[size];
+        int index = 0;
+
+        RBNode current = getRoot();
+        if (current == null) {
+            return arr;
+        }
+
+        int state = 0; // 0 - none done, 1 - left subtree done, 2 - all done. (relative to current)
+        while (current != sentinel) {
+            switch (state) {
+                case 0:
+                    if (current.getLeft() != null) {
+                        current = current.getLeft();
+                    } else {
+                        state = 1;
+                    }
+                    break;
+                case 1:
+                    arr[index++] = current.getValue();
+                    if (current.getRight() != null) {
+                        current = current.getRight();
+                    } else {
+                        state = 2;
+                    }
+                    break;
+                case 2:
+                    if(isRightChild(current)){
+                        state = 2;
+                    }else{
+                        state = 1;
+                    }
+                    current = current.getParent();
+                    break;
+            }
+        }
+
+        return arr;
     }
 
     /**
@@ -371,7 +478,17 @@ public class RBTree {
      * this file, not in another file.
      */
 
+    /**
+     * Replaces the subtree of oldNode with the subtree of a different node, newNode.
+     * The oldNode's parent attribute is not changed even though it is not his child anymore.
+     *
+     * @param oldNode The node to be replaced.
+     * @param newNode The replacer node, may be null.
+     */
     private void transplant(RBNode oldNode, RBNode newNode) {
+        assert oldNode != null;
+        assert oldNode != newNode;
+
         if (oldNode.getParent() == sentinel) {
             sentinel.setRight(newNode);
         } else {
@@ -382,7 +499,9 @@ public class RBTree {
             }
         }
 
-        newNode.setParent(oldNode.getParent());
+        if (newNode != null) {
+            newNode.setParent(oldNode.getParent());
+        }
     }
 
     /**
@@ -438,6 +557,8 @@ public class RBTree {
     }
 
     private boolean isRightChild(RBNode node) {
+        assert node != null;
+
         return node.getParent().getRight() == node;
     }
 
@@ -445,9 +566,12 @@ public class RBTree {
      * Fix the Red Black tree after a deletion so it will satisfy all the conditions it should.
      *
      * @param fixNode The node that replaced the node that his color is missing.
+     *                If the replacer node is null then a dummy node representing it should be given instead.
      * @return The number of color switches.
      */
     private int fixDelete(RBNode fixNode) {
+        assert fixNode != null;
+
         int colorSwitches = 0;
         while (fixNode.parent != sentinel && fixNode.color == Color.BLACK) {
             if (isRightChild(fixNode)) {
@@ -477,16 +601,16 @@ public class RBTree {
                     }
 
                     Color c = fixNode.getParent().getColor();
-                    if(brother.getColor() != c){
+                    if (brother.getColor() != c) {
                         colorSwitches++;
                     }
                     brother.setColor(c);
-                    if(fixNode.getParent().getColor() != Color.BLACK){
+                    if (fixNode.getParent().getColor() != Color.BLACK) {
                         colorSwitches++;
                     }
                     fixNode.getParent().setColor(Color.BLACK);
                     if (brother.getLeft() != null) {
-                        if(brother.getLeft().getColor() != Color.BLACK){
+                        if (brother.getLeft().getColor() != Color.BLACK) {
                             colorSwitches++;
                         }
                         brother.getLeft().setColor(Color.BLACK);
@@ -515,7 +639,7 @@ public class RBTree {
                     if (brother.getRight() == null || brother.getRight().getColor() == Color.BLACK) {
                         colorSwitches++;
                         brother.getLeft().setColor(Color.BLACK); // A red left node exists because only right is black
-                        if(brother.getColor() == Color.BLACK){
+                        if (brother.getColor() == Color.BLACK) {
                             colorSwitches++;
                         }
                         brother.setColor(Color.RED);
@@ -524,16 +648,16 @@ public class RBTree {
                     }
 
                     Color c = fixNode.getParent().getColor();
-                    if(brother.getColor() != c){
+                    if (brother.getColor() != c) {
                         colorSwitches++;
                     }
                     brother.setColor(c);
-                    if(fixNode.getParent().getColor() != Color.BLACK){
+                    if (fixNode.getParent().getColor() != Color.BLACK) {
                         colorSwitches++;
                     }
                     fixNode.getParent().setColor(Color.BLACK);
                     if (brother.getRight() != null) {
-                        if(brother.getRight().getColor() != Color.BLACK){
+                        if (brother.getRight().getColor() != Color.BLACK) {
                             colorSwitches++;
                         }
                         brother.getRight().setColor(Color.BLACK);
@@ -544,7 +668,7 @@ public class RBTree {
             }
         }
 
-        if(fixNode.getColor() != Color.BLACK){
+        if (fixNode.getColor() != Color.BLACK) {
             colorSwitches++;
         }
         fixNode.setColor(Color.BLACK);
@@ -552,12 +676,14 @@ public class RBTree {
         return colorSwitches;
     }
 
+    /**
+     * Makes a right rotate with the given node as the "pivot"
+     *
+     * @param node The node to rotate around, the node should have a left child.
+     */
     private void rightRotate(RBNode node) {
-        if (node == null) {
-            throw new IllegalArgumentException("node should not be null");
-        } else if (node.getLeft() == null) {
-            throw new IllegalArgumentException("node's left child should not be null");
-        }
+        assert node != null;
+        assert node.getLeft() != null;
 
         RBNode y = node.getLeft();
 
@@ -580,12 +706,14 @@ public class RBTree {
         node.setParent(y);
     }
 
+    /**
+     * Makes a left rotate with the given node as the "pivot"
+     *
+     * @param node The node to rotate around, the node should have a right child.
+     */
     private void leftRotate(RBNode node) {
-        if (node == null) {
-            throw new IllegalArgumentException("node should not be null");
-        } else if (node.getRight() == null) {
-            throw new IllegalArgumentException("node's right child should not be null");
-        }
+        assert node != null;
+        assert node.getRight() != null;
 
         RBNode y = node.getRight();
 
