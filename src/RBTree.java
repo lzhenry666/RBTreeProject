@@ -1,3 +1,5 @@
+
+// TODO Delete imports used only for testing:
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -587,7 +589,7 @@ public class RBTree
 	 */
 	public int rank(int k)
 	{
-		return 42; // to be replaced by student code
+		return 42; // TODO Implement this!
 	}
 
 	/**
@@ -972,7 +974,7 @@ public class RBTree
 		return node.left;
 	}
 
-	/********************************************/
+	// TODO Delete this testing stuff:
 	private BufferedImage paintImage;
 	private int XDIM, YDIM;
 	private Graphics2D display;
