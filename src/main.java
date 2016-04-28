@@ -13,9 +13,9 @@ public class main
 	// Choose mode here, or create your own by changing the variable 'key'
 	public static Mode mode = Mode.Random;
 	// Make sure the folder exists
-	public static String insertPath = "C:\\Users\\navet\\Desktop\\pics\\b";
+	public static String insertPath = "C:\\Users\\Dell\\Desktop\\pics\\i";
 	// Make sure the folder exists
-	public static String deletePath = "C:\\Users\\navet\\Desktop\\pics\\b";
+	public static String deletePath = "C:\\Users\\Dell\\Desktop\\pics\\d";
 	// If on random mode - choose a different seed to get a different random
 	// tree
 	public static int randomSeed = 8;
@@ -25,7 +25,7 @@ public class main
 	// the next ones
 	public static int NUM_OF_NODES = 10;
 	public static boolean saveInsertPictures = true;
-	public static boolean saveDeletePictures = false;
+	public static boolean saveDeletePictures = true;
 
 	public static void main(String[] args) throws IOException
 	{

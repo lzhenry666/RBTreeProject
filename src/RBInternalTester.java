@@ -1,6 +1,4 @@
-import temptest.RBTree.RBNode;
-
-public class RBInternalTester 
+public class RBInternalTester
 {
 
 	public static boolean isTreeValid(RBTree t)
@@ -19,7 +17,7 @@ public class RBInternalTester
 		return true;
 	}
 	
-	private static boolean checkRedRule(RBNode currNode)
+	private static boolean checkRedRule(RBTree.RBNode currNode)
 	{
 		if(currNode == null || currNode.getKey() < 0)
 		{
@@ -39,12 +37,12 @@ public class RBInternalTester
 		return leftOk && rightOk;
 	}
 	
-	private static boolean checkBlackRule(RBNode currNode)
+	private static boolean checkBlackRule(RBTree.RBNode currNode)
 	{
 		return minBlackPaths(currNode,0) == maxBlackPaths(currNode,0);
 	}
 	
-	private static int minBlackPaths(RBNode currNode,int currBlackCount)
+	private static int minBlackPaths(RBTree.RBNode currNode, int currBlackCount)
 	{
 		if(currNode == null || currNode.getKey() < 0)
 			return currBlackCount;
@@ -54,7 +52,7 @@ public class RBInternalTester
 		
 	}
 	
-	private static int maxBlackPaths(RBNode currNode,int currBlackCount)
+	private static int maxBlackPaths(RBTree.RBNode currNode, int currBlackCount)
 	{
 		if(currNode == null|| currNode.getKey() < 0)
 			return currBlackCount;

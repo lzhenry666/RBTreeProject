@@ -1,7 +1,3 @@
-package temptest;
-
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.Random;
 import java.util.Collections;
