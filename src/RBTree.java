@@ -44,7 +44,7 @@ public class RBTree
 		private RBNode left;
 		private RBNode right;
 		private RBNode parent;
-		private int size;
+		private int size; // Size of subtree with this node as the root
 
 		private static final int DUMMY_LEFT_KEY = -10;
 		private static final int DUMMY_RIGHT_KEY = -20;
@@ -151,7 +151,8 @@ public class RBTree
 		}
 	}
 
-	private RBNode sentinel;
+	private RBNode sentinel; // "Parent" of the root, used as explained in the
+								// slides shown in class
 
 	public RBTree()
 	{
@@ -198,10 +199,11 @@ public class RBTree
 			else
 				current = current.getRight();
 		}
-		if (current == null)
+		if (current == null) // If the node was not found we reach null (leaf)
 			return null;
 
-		return current.getValue();
+		return current.getValue(); // If the node was found we can call
+									// getValue().
 	}
 
 	/**
@@ -245,18 +247,42 @@ public class RBTree
 		{
 			if (currentNode.getParent().getNodeColor() == NodeColor.RED)
 			{
-				if (currentNode.getParent().getParent().getLeft() != null
-						&& currentNode.getParent().getParent().getRight() != null
-						&& currentNode.getParent().getParent().getLeft().getNodeColor() == currentNode.getParent()
+				if (currentNode.getParent().getParent().getLeft() != null // null
+																			// is
+																			// black
+						&& currentNode.getParent().getParent().getRight() != null // null
+																					// is
+																					// black
+						&& currentNode.getParent().getParent().getLeft().getNodeColor() == currentNode.getParent() // if
+																													// they
+																													// are
+																													// not
+																													// of
+																													// the
+																													// same
+																													// color
+																													// the
+																													// uncle
+																													// must
+																													// be
+																													// black
+																													// (parent
+																													// is
+																													// red)
 								.getParent().getRight().getNodeColor()) // Case
-				// 1
+																		// 1 -
+																		// red
+																		// parent,
+																		// red
+																		// uncle
 				{
+					// "Moving the problem 2 layers upwards"
 					currentNode.getParent().getParent().getLeft().setNodeColor(NodeColor.BLACK);
 					currentNode.getParent().getParent().getRight().setNodeColor(NodeColor.BLACK);
 					currentNode = currentNode.getParent().getParent();
 					currentNode.setNodeColor(NodeColor.RED);
 					changeCount += 3;
-					if (currentNode == this.getRoot())
+					if (currentNode == this.getRoot()) // Root must remain black
 					{
 						currentNode.setNodeColor(NodeColor.BLACK);
 						changeCount += 1;
@@ -265,10 +291,16 @@ public class RBTree
 				} else
 				{
 					if (!this.isRightChild(currentNode.getParent())) // Cases
-					// 2+3
+																		// 2+3 -
+																		// red
+																		// parent,
+																		// black
+																		// uncle
 					{
 						boolean case2happened = false;
-						if (this.isRightChild(currentNode)) // Case 2
+						if (this.isRightChild(currentNode)) // Case 2 - rotate
+															// to turn into case
+															// 3
 						{
 							RBNode B = currentNode, A = B.getParent(), C = A.getParent();
 							C.setLeft(B);
@@ -287,7 +319,7 @@ public class RBTree
 
 							case2happened = true;
 						}
-						// Case 3
+						// Case 3 - rotate to fix problem
 						RBNode B = currentNode;
 						if (!case2happened)
 							B = B.getParent();
@@ -307,16 +339,17 @@ public class RBTree
 						int cs = C.size;
 						B.size = cs;
 						C.size -= (1 + B.left.size); // No need to check if null
-						// since B must have a
-						// left child in case 3
-						// - A
+														// since B must have a
+														// left child in case 3
+														// - A
 
 						B.setNodeColor(NodeColor.BLACK);
 						C.setNodeColor(NodeColor.RED);
 					} else // Cases 2+3 - mirrored
 					{
 						boolean case2happened = false;
-						if (!this.isRightChild(currentNode)) // Case 2 - mirror
+						if (!this.isRightChild(currentNode)) // Case 2 -
+																// mirrored
 						{
 							RBNode B = currentNode, A = B.getParent(), C = A.getParent();
 							C.setRight(B);
@@ -335,7 +368,7 @@ public class RBTree
 
 							case2happened = true;
 						}
-						// Case 3 - mirror
+						// Case 3 - mirrored
 						RBNode B = currentNode;
 						if (!case2happened)
 							B = B.getParent();
@@ -355,9 +388,9 @@ public class RBTree
 						int cs = C.size;
 						B.size = cs;
 						C.size -= (1 + B.right.size); // No need to check if
-						// null since B must
-						// have a right child in
-						// case 3 - A
+														// null since B must
+														// have a right child in
+														// case 3 - A
 
 						B.setNodeColor(NodeColor.BLACK);
 						C.setNodeColor(NodeColor.RED);
