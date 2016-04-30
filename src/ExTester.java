@@ -227,9 +227,11 @@ public class ExTester {
 		MyTree myTree = new MyTree();
 		int[] keys = generateKeys();
 		insert(rbTree, myTree, keys);
+		assert rbTree.size() == myTree.size();
 		for (int j = 0; j < keys.length; j++) {
 			rbTree.delete(keys[j]);
 			myTree.delete(keys[j]);
+			assert rbTree.size() == myTree.size() : j;
 			if (!checkKeysArray(rbTree, myTree))
 				return false;
 			if (!checkValuesArray(rbTree, myTree))
@@ -321,7 +323,7 @@ public class ExTester {
 			Thread test_thread = new Thread(test_runner);
 			test_thread.start();
 			try {
-				test_thread.join(10000);
+				test_thread.join(40000);
 				if (test_thread.isAlive())
 					System.out.println("Timeout on Test " + test_num);
 			}
