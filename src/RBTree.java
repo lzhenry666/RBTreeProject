@@ -39,10 +39,13 @@ public class RBTree {
         private RBNode left;
         private RBNode right;
         private RBNode parent;
-        private int size; // Size of subtree with this node as the root
+        /** Size of subtree with this node as the root */
+        private int size;
 
-        private static final int DUMMY_LEFT_KEY = -10; // The key that is used to idetify a left dummy node.
-        private static final int DUMMY_RIGHT_KEY = -20; // The key that is used to identify a right dummy node.
+        /** The key that is used to idetify a left dummy node. */
+        private static final int DUMMY_LEFT_KEY = -10;
+        /** The key that is used to identify a right dummy node. */
+        private static final int DUMMY_RIGHT_KEY = -20;
 
         /**
          * Creates a new Red Black node with the given attributes, no children
@@ -132,10 +135,11 @@ public class RBTree {
         }
     }
 
-    private RBNode sentinel; // "Parent" of the root, used as explained in the
-    // slides shown in class
+    /** "Parent" of the root, used as explained in the slides shown in class */
+    private RBNode sentinel;
 
     public RBTree() {
+        // Set up the sentinel.
         this.sentinel = new RBNode(-1, null, sentinel);
         this.sentinel.setLeft(this.sentinel);
         this.sentinel.setParent(sentinel);
@@ -191,8 +195,6 @@ public class RBTree {
      * with key k already exists in the tree.
      */
     public int insert(int k, String v) {
-        assert RBInternalTester.isTreeValid(this);
-
         // Insertion:
         RBNode nearest = this.findParentNode(k);
         if (nearest == null) // Only happens if the tree is empty
@@ -383,13 +385,7 @@ public class RBTree {
      * switches, or 0 if no color switches were needed. returns -1 if an item
      * with key k was not found in the tree.
      */
-    static int ricardo = 0; // TODO: Ricardo should not be here.
-
     public int delete(int k) {
-        assert RBInternalTester.isTreeValid(this);
-        assert assertSizes(getRoot());
-        ricardo++;
-
         RBNode deleted = findNode(k);
         if (deleted == null) {
             return -1;
@@ -397,64 +393,49 @@ public class RBTree {
 
         RBNode fixNode;
 
-        NodeColor missingNodeColor = deleted.color; // The color that we have
-        // removed
-        // from the tree and might cause
-        // problems.
+        // The color that we have removed from the tree and might cause problems.
+        NodeColor missingNodeColor = deleted.color;
+
         boolean isDeletedRightChild = isRightChild(deleted);
+        // When the deleted node has a single child we replace it with him.
         if (deleted.getLeft() == null) {
             fixNode = deleted.getRight();
             transplant(deleted, fixNode);
             if (fixNode == null) {
-                fixNode = new RBNode(deleted.getParent(), isDeletedRightChild); // Creating
-                // a
-                // dummy
-                // node representing
-                // the null "node".
+                // Creating a dummy node representing the null "node".
+                fixNode = new RBNode(deleted.getParent(), isDeletedRightChild);
             }
         } else if (deleted.getRight() == null) {
             fixNode = deleted.getLeft();
             transplant(deleted, fixNode);
             if (fixNode == null) {
-                fixNode = new RBNode(deleted.getParent(), isDeletedRightChild); // Creating
-                // a
-                // dummy
-                // node representing
-                // the null "node".
+                // Creating a dummy node representing the null "node".
+                fixNode = new RBNode(deleted.getParent(), isDeletedRightChild);
             }
         } else {
-            /**
-             * If the deleted node has 2 children we replace it with it's
-             * successor: First, if the successor is not the deleted node's
-             * right child we replace the successor with his (the successor's)
-             * right child (which will be our fixNode). Then, we replace the
-             * deleted node with the successor, and change the successor color
-             * to the deleted node's color, so the missing color is the
-             * successors's color.
-             */
+            // If the deleted node has 2 children we replace it with it's
+            // successor: First, if the successor is not the deleted node's
+            // right child we replace the successor with his (the successor's)
+            // right child (which will be our fixNode). Then, we replace the
+            // deleted node with the successor, and change the successor color
+            // to the deleted node's color, so the missing color is the
+            // successors's color.
             RBNode successor = getSuccessorInSub(deleted);
             missingNodeColor = successor.getNodeColor();
 
             fixNode = successor.getRight();
             if (successor.getParent() != deleted) {
                 boolean isSuccessorRightChild = isRightChild(successor);
-                assert !isSuccessorRightChild;
                 transplant(successor, fixNode);
                 if (fixNode == null) {
-                    fixNode = new RBNode(successor.getParent(), isSuccessorRightChild); // Creating
-                    // a
-                    // dummy
-                    // node
-                    // representing
-                    // the null
-                    // "node".
+                    // Creating a dummy node representing the null "node".
+                    fixNode = new RBNode(successor.getParent(), isSuccessorRightChild);
                 }
                 successor.setRight(deleted.getRight());
                 successor.getRight().setParent(successor);
             } else if (fixNode == null) {
-                fixNode = new RBNode(successor, true); // Creating a dummy node
-                // representing the null
-                // "node".
+                // Creating a dummy node representing the null "node".
+                fixNode = new RBNode(successor, true);
             }
             transplant(deleted, successor);
             successor.setLeft(deleted.getLeft());
@@ -462,19 +443,19 @@ public class RBTree {
             successor.setNodeColor(deleted.getNodeColor());
         }
 
-        if (fixNode.getKey() >= 0) { // Not dummy.
+        if (fixNode.getKey() >= 0) {
+            // fixNode is not dummy.
             updateSizeUpToRoot(fixNode);
         } else if (fixNode.getParent() != sentinel) {
             updateSizeUpToRoot(fixNode.getParent());
         }
         //At this point sizes should be correct.
-        assert assertSizes(getRoot());
 
         if (missingNodeColor == NodeColor.BLACK) {
+            // If there is (extra) darkness upon the earth we should fix it.
             return fixDelete(fixNode);
         }
 
-        assert assertSizes(getRoot());
         return 0;
     }
 
@@ -513,6 +494,7 @@ public class RBTree {
      * <p>
      * Returns a sorted array which contains all keys in the tree, or an empty
      * array if the tree is empty.
+     * The function picks the keys with an inorder recursion and thus runs in O(n) time.
      */
     public int[] keysToArray() {
         int[] arr = new int[this.size()];
@@ -523,9 +505,13 @@ public class RBTree {
             return arr;
         }
 
-        // A weird (stack-less) inorder recursion:
-        int state = 0; // 0 - none done, 1 - left subtree done, 2 - all done.
-        // (relative to current)
+        // A weird implementation of (stack-less) inorder recursion:
+
+        // states (the states are relative to the current):
+        // 0 - none has been done in current's subtree,
+        // 1 - left subtree of current's subtree is done,
+        // 2 - all has been done is current's subtree (time to go to papa!).
+        int state = 0;
         while (current != sentinel) {
             switch (state) {
                 case 0:
@@ -564,6 +550,8 @@ public class RBTree {
      * <p>
      * Returns an array which contains all values in the tree, sorted by their
      * respective keys, or an empty array if the tree is empty.
+     * The function uses inorder recursion to pick the nodes' values according to the keys order
+     * thus runs in O(n) time.
      */
     public String[] valuesToArray() {
         String[] arr = new String[this.size()];
@@ -574,9 +562,14 @@ public class RBTree {
             return arr;
         }
 
-        // A wierd (stack-less) inorder recursion:
-        int state = 0; // 0 - none done, 1 - left subtree done, 2 - all done.
-        // (relative to current)
+        // A weird implementation of (stack-less) inorder recursion:
+
+        // states (the states are relative to the current):
+        // 0 - none has been done in current's subtree,
+        // 1 - left subtree of current's subtree is done,
+        // 2 - all has been done is current's subtree (time to go to papa!).
+        int state = 0;
+
         while (current != sentinel) {
             switch (state) {
                 case 0:
@@ -612,6 +605,7 @@ public class RBTree {
 
     /**
      * public int size()
+     * The function runs in O(1) time Dahhh.
      * <p>
      * Returns the number of nodes in the tree.
      * <p>
@@ -653,34 +647,15 @@ public class RBTree {
      */
 
     /**
-     * A non documented utiliy function.
-     */
-    private boolean assertSizes(RBNode node) {
-        if (node == null) {
-            return true;
-        }
-
-        if (!assertSizes(node.getLeft()) || !assertSizes(node.getRight())) {
-            return false;
-        }
-
-        return node.getSize() == 1 +
-                (node.getLeft() != null ? node.getLeft().getSize() : 0) +
-                (node.getRight() != null ? node.getRight().getSize() : 0);
-    }
-
-    /**
      * Replaces the subtree of oldNode with the subtree of a different node,
      * newNode. The oldNode's parent attribute is not changed even though it is
      * not his child anymore.
+     * The function runs in O(1) time.
      *
      * @param oldNode The node to be replaced.
      * @param newNode The replacer node, may be null.
      */
     private void transplant(RBNode oldNode, RBNode newNode) {
-        assert oldNode != null;
-        assert oldNode != newNode;
-
         if (oldNode.getParent() == sentinel) {
             sentinel.setRight(newNode);
         } else {
@@ -730,12 +705,11 @@ public class RBTree {
      * Updates the size of the given node according to it's children's sizes.
      * node-size = 1 + left-child-size + right-child-size
      * Unless you do something crazy make sure the children's size is updated before calling updateSize!
+     * The function runs in O(1) time.
      *
      * @param node The node to update it's size.
      */
     private void updateSize(RBNode node) {
-        assert node != null;
-
         int size = 1;
         if (node.getLeft() != null) {
             size += node.getLeft().getSize();
@@ -749,12 +723,11 @@ public class RBTree {
 
     /**
      * Updates the size of the given node and all it's ancestors.
+     * The function runs in O(h)=O(lg n) time.
      *
      * @param node The node to update it's size.
      */
     private void updateSizeUpToRoot(RBNode node) {
-        assert node != null;
-
         while (node != sentinel) {
             updateSize(node);
             node = node.getParent();
@@ -763,6 +736,7 @@ public class RBTree {
 
     /**
      * returns the node with the key k if it exists, else returns null.
+     * The function uses a binary search to find the node thus it runs in O(log(n)).
      *
      * @param k The key of the node to be searched
      * @return The node with the key k if it exists, else null
@@ -803,6 +777,7 @@ public class RBTree {
      * returns weather the RBNode node is a right child or not. If the given
      * node is "dummy" (not recognized by his parent) then the procedure checks
      * if it's key is DUMMY_RIGHT_KEY.
+     * The function runs in O(1) time.
      *
      * @param node the node that is checked, if the node is null a "dummy" node
      *             should be passed.
@@ -810,8 +785,6 @@ public class RBTree {
      * left child.
      */
     private boolean isRightChild(RBNode node) {
-        assert node != null;
-
         if (node.getParent().getRight() == node) {
             return true;
         } else if (node.getParent().getLeft() == node) {
@@ -831,13 +804,11 @@ public class RBTree {
      * @return The number of color switches.
      */
     private int fixDelete(RBNode fixNode) {
-        assert fixNode != null : "ricardo: " + ricardo;
-
         int colorSwitches = 0;
         while (fixNode.parent != sentinel && fixNode.color == NodeColor.BLACK) {
             if (isRightChild(fixNode)) {
-                RBNode brother = fixNode.getParent().getLeft(); // Exists
-                assert brother != null : "ricardo :" + ricardo;
+                // Exists
+                RBNode brother = fixNode.getParent().getLeft();
 
                 if (brother.getNodeColor() == NodeColor.RED) {
                     colorSwitches++;
@@ -857,22 +828,12 @@ public class RBTree {
                 } else {
                     if (brother.getLeft() == null || brother.getLeft().getNodeColor() == NodeColor.BLACK) {
                         colorSwitches++;
-                        brother.getRight().setNodeColor(NodeColor.BLACK); // A
-                        // red
-                        // right
-                        // node
-                        // exists
-                        // because
-                        // only
-                        // left
-                        // is
-                        // black
+                        // A red right node exists because only left is black
+                        brother.getRight().setNodeColor(NodeColor.BLACK);
                         brother.setNodeColor(NodeColor.RED);
                         leftRotate(brother);
-                        brother = fixNode.getParent().getLeft(); // It turns out
-                        // brothers
-                        // can be
-                        // replaced.
+                        // It turns out brothers can be replaced.
+                        brother = fixNode.getParent().getLeft();
                     }
 
                     NodeColor c = fixNode.getParent().getNodeColor();
@@ -894,8 +855,8 @@ public class RBTree {
                     fixNode = getRoot();
                 }
             } else {
-                RBNode brother = fixNode.getParent().getRight(); // Exists
-                assert brother != null : "ricardo :" + ricardo;
+                // Exists
+                RBNode brother = fixNode.getParent().getRight();
 
                 if (brother.getNodeColor() == NodeColor.RED) {
                     colorSwitches++;
@@ -916,25 +877,14 @@ public class RBTree {
                     if (brother.getRight() == null || brother.getRight().getNodeColor() == NodeColor.BLACK) {
                         colorSwitches++;
                         brother.getLeft().setNodeColor(NodeColor.BLACK); // A
-                        // red
-                        // left
-                        // node
-                        // exists
-                        // because
-                        // only
-                        // right
-                        // is
-                        // black.
+                        // red left node exists because only right is black.
                         if (brother.getNodeColor() == NodeColor.BLACK) {
                             colorSwitches++;
                         }
                         brother.setNodeColor(NodeColor.RED);
                         rightRotate(brother);
-                        brother = fixNode.getParent().getRight(); // It turns
-                        // out
-                        // brothers
-                        // can be
-                        // replaced.
+                        // It turns out brothers can be replaced.
+                        brother = fixNode.getParent().getRight();
                     }
 
                     NodeColor c = fixNode.getParent().getNodeColor();
@@ -964,19 +914,17 @@ public class RBTree {
         fixNode.setNodeColor(NodeColor.BLACK);
 
         // At this point sizes should be correct.
-        assert assertSizes(getRoot());
+
         return colorSwitches;
     }
 
     /**
      * Makes a right rotate with the given node as the "pivot" and updates the sizes accordingly.
+     * The function runs in O(1) time.
      *
      * @param node The node to rotate around, the node should have a left child.
      */
     private void rightRotate(RBNode node) {
-        assert node != null;
-        assert node.getLeft() != null;
-
         RBNode replacer = node.getLeft();
 
         // Set the replacer as a child instead of node.
@@ -1006,13 +954,11 @@ public class RBTree {
 
     /**
      * Makes a left rotate with the given node as the "pivot" and updates the sizes accordingly.
+     * The function runs in O(1) time.
      *
      * @param node The node to rotate around, the node should have a right child.
      */
     private void leftRotate(RBNode node) {
-        assert node != null;
-        assert node.getRight() != null;
-
         RBNode replacer = node.getRight();
 
         // Set the replacer as a child instead of node.
@@ -1042,6 +988,7 @@ public class RBTree {
 
     /**
      * Returns the successor of the given node in it's sub tree
+     * The function uses getMinimum and thus runs in O(lg n) time.
      *
      * @param node A node to look for his successor, may be null.
      * @return The successor of the node in it's sub tree, null if node is
@@ -1078,6 +1025,7 @@ public class RBTree {
 
     /**
      * Get the node with the minimal key in the subtree of the given node.
+     * The function travels down the left path of node's subtree and thus runs in O(h) = O(lg n) time.
      *
      * @param node The node to search in his subtree, may be null.
      * @return The node with the minimal key, or null if node is null.
@@ -1094,6 +1042,10 @@ public class RBTree {
         return node;
     }
 
+    /**
+     * A non documented self explanatory function.
+     * @return The string that you have expected.
+     */
     @Override
     public String toString() {
         return this.keysToArray().toString();
