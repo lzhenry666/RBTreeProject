@@ -184,19 +184,10 @@ public class RBTree
 	 */
 	public String search(int k)
 	{
-		RBNode current = this.getRoot();
-		while (current != null && current.getKey() != k)
-		{
-			if (current.getKey() > k)
-				current = current.getLeft();
-			else
-				current = current.getRight();
-		}
-		if (current == null) // If the node was not found we reach null (leaf)
+		RBNode node = this.findNode(k);
+		if (node == null)
 			return null;
-
-		return current.getValue(); // If the node was found we can call
-		// getValue().
+		return node.getValue();
 	}
 
 	/**
