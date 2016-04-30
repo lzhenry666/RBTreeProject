@@ -748,7 +748,8 @@ public class RBTree {
     }
 
     /**
-     * Updates the size of the given node and all it's ancestors.
+     * Updates (using updateSize) the size of the given node and all it's ancestors,
+     * starting with node and going up the ancestry path to the root.
      *
      * @param node The node to update it's size.
      */
@@ -762,10 +763,11 @@ public class RBTree {
     }
 
     /**
-     * returns the node with the key k if it exists, else returns null.
+     * Returns the node with the key k if it exists, else returns null.
+     * The function uses a binary search to find the node thus it runs in O(log(n)).
      *
      * @param k The key of the node to be searched
-     * @return The node with the key k if it exists, else null
+     * @return The node with the key k if it exists, else null.
      */
     private RBNode findNode(int k) {
         RBNode current = getRoot();
