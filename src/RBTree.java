@@ -382,7 +382,7 @@ public class RBTree {
      * <p>
      * deletes an item with key k from the binary tree, if it is there; the tree
      * must remain valid (keep its invariants). returns the number of color
-     * switches, or 0 if no color switches were needed. returns -1 if an item
+     * switches, or 0 if no color switches happened. returns -1 if an item
      * with key k was not found in the tree.
      */
     public int delete(int k) {
@@ -417,7 +417,7 @@ public class RBTree {
             // successor: First, if the successor is not the deleted node's
             // right child we replace the successor with his (the successor's)
             // right child (which will be our fixNode). Then, we replace the
-            // deleted node with the successor, and change the successor color
+            // deleted node with the successor, and change the successor's color
             // to the deleted node's color, so the missing color is the
             // successors's color.
             RBNode successor = getSuccessorInSub(deleted);
@@ -796,7 +796,7 @@ public class RBTree {
 
     /**
      * Fix the Red Black tree after a deletion so it will satisfy all the
-     * conditions it should.
+     * conditions it should. Nodes' sizes are expected to be correct.
      *
      * @param fixNode The node that replaced the node that his color is missing. If
      *                the replacer node is null then a dummy node representing it
