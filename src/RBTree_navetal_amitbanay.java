@@ -21,7 +21,7 @@ import javax.imageio.ImageIO;
  * keys and values
  */
 
-public class RBTree
+public class RBTree_navetal_amitbanay
 {
 
 	public enum NodeColor
@@ -158,7 +158,7 @@ public class RBTree
 	/** "Parent" of the root, used as explained in the slides shown in class */
 	private RBNode sentinel;
 
-	public RBTree()
+	public RBTree_navetal_amitbanay()
 	{
 		// Set up the sentinel.
 		this.sentinel = new RBNode(-1, null, sentinel);

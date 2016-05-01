@@ -10,8 +10,8 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-/* Nave Tal: 208518456
- * Amit Banay: 208520528
+/* Nave Tal: (moodle username: navetal) 208518456
+ * Amit Banay: (moodle username: amitbanay) 208520528
  */
 
 /**
@@ -1055,7 +1055,6 @@ public class RBTree {
 
     /**
      * A non documented self explanatory function.
-     *
      * @return The string that you have expected.
      */
     @Override
