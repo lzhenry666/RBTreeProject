@@ -39,12 +39,18 @@ public class RBTree {
         private RBNode left;
         private RBNode right;
         private RBNode parent;
-        /** Size of subtree with this node as the root */
+        /**
+         * Size of subtree with this node as the root
+         */
         private int size;
 
-        /** The key that is used to idetify a left dummy node. */
+        /**
+         * The key that is used to idetify a left dummy node.
+         */
         private static final int DUMMY_LEFT_KEY = -10;
-        /** The key that is used to identify a right dummy node. */
+        /**
+         * The key that is used to identify a right dummy node.
+         */
         private static final int DUMMY_RIGHT_KEY = -20;
 
         /**
@@ -135,7 +141,9 @@ public class RBTree {
         }
     }
 
-    /** "Parent" of the root, used as explained in the slides shown in class */
+    /**
+     * "Parent" of the root, used as explained in the slides shown in class
+     */
     private RBNode sentinel;
 
     public RBTree() {
@@ -391,6 +399,8 @@ public class RBTree {
             return -1;
         }
 
+        int colorSwitches = 0;
+
         RBNode fixNode;
 
         // The color that we have removed from the tree and might cause problems.
@@ -440,7 +450,10 @@ public class RBTree {
             transplant(deleted, successor);
             successor.setLeft(deleted.getLeft());
             successor.getLeft().setParent(successor);
-            successor.setNodeColor(deleted.getNodeColor());
+            if (successor.getNodeColor() != deleted.getNodeColor()) {
+                colorSwitches++; //should? or not should?
+                successor.setNodeColor(deleted.getNodeColor());
+            }
         }
 
         if (fixNode.getKey() >= 0) {
@@ -453,10 +466,10 @@ public class RBTree {
 
         if (missingNodeColor == NodeColor.BLACK) {
             // If there is (extra) darkness upon the earth we should fix it.
-            return fixDelete(fixNode);
+            colorSwitches += fixDelete(fixNode);
         }
 
-        return 0;
+        return colorSwitches;
     }
 
     /**
@@ -815,8 +828,8 @@ public class RBTree {
                     brother.setNodeColor(NodeColor.BLACK);
                     if (fixNode.getParent().getNodeColor() != NodeColor.RED) {
                         colorSwitches++;
+                        fixNode.getParent().setNodeColor(NodeColor.RED);
                     }
-                    fixNode.getParent().setNodeColor(NodeColor.RED);
                     rightRotate(fixNode.getParent());
                     brother = fixNode.getParent().getLeft();
                 }
@@ -839,17 +852,17 @@ public class RBTree {
                     NodeColor c = fixNode.getParent().getNodeColor();
                     if (brother.getNodeColor() != c) {
                         colorSwitches++;
+                        brother.setNodeColor(c);
                     }
-                    brother.setNodeColor(c);
                     if (fixNode.getParent().getNodeColor() != NodeColor.BLACK) {
                         colorSwitches++;
+                        fixNode.getParent().setNodeColor(NodeColor.BLACK);
                     }
-                    fixNode.getParent().setNodeColor(NodeColor.BLACK);
                     if (brother.getLeft() != null) {
                         if (brother.getLeft().getNodeColor() != NodeColor.BLACK) {
                             colorSwitches++;
+                            brother.getLeft().setNodeColor(NodeColor.BLACK);
                         }
-                        brother.getLeft().setNodeColor(NodeColor.BLACK);
                     }
                     rightRotate(fixNode.getParent());
                     fixNode = getRoot();
@@ -858,13 +871,13 @@ public class RBTree {
                 // Exists
                 RBNode brother = fixNode.getParent().getRight();
 
-                if (brother.getNodeColor() == NodeColor.RED) {
+                if (brother.getNodeColor() != NodeColor.BLACK) {
                     colorSwitches++;
                     brother.setNodeColor(NodeColor.BLACK);
                     if (fixNode.getParent().getNodeColor() != NodeColor.RED) {
                         colorSwitches++;
+                        fixNode.getParent().setNodeColor(NodeColor.RED);
                     }
-                    fixNode.getParent().setNodeColor(NodeColor.RED);
                     leftRotate(fixNode.getParent());
                     brother = fixNode.getParent().getRight();
                 }
@@ -878,9 +891,7 @@ public class RBTree {
                         colorSwitches++;
                         brother.getLeft().setNodeColor(NodeColor.BLACK); // A
                         // red left node exists because only right is black.
-                        if (brother.getNodeColor() == NodeColor.BLACK) {
-                            colorSwitches++;
-                        }
+                        colorSwitches++;
                         brother.setNodeColor(NodeColor.RED);
                         rightRotate(brother);
                         // It turns out brothers can be replaced.
@@ -890,17 +901,17 @@ public class RBTree {
                     NodeColor c = fixNode.getParent().getNodeColor();
                     if (brother.getNodeColor() != c) {
                         colorSwitches++;
+                        brother.setNodeColor(c);
                     }
-                    brother.setNodeColor(c);
                     if (fixNode.getParent().getNodeColor() != NodeColor.BLACK) {
                         colorSwitches++;
+                        fixNode.getParent().setNodeColor(NodeColor.BLACK);
                     }
-                    fixNode.getParent().setNodeColor(NodeColor.BLACK);
                     if (brother.getRight() != null) {
                         if (brother.getRight().getNodeColor() != NodeColor.BLACK) {
                             colorSwitches++;
+                            brother.getRight().setNodeColor(NodeColor.BLACK);
                         }
-                        brother.getRight().setNodeColor(NodeColor.BLACK);
                     }
                     leftRotate(fixNode.getParent());
                     fixNode = getRoot();
@@ -910,8 +921,8 @@ public class RBTree {
 
         if (fixNode.getNodeColor() != NodeColor.BLACK) {
             colorSwitches++;
+            fixNode.setNodeColor(NodeColor.BLACK);
         }
-        fixNode.setNodeColor(NodeColor.BLACK);
 
         // At this point sizes should be correct.
 
@@ -1044,83 +1055,11 @@ public class RBTree {
 
     /**
      * A non documented self explanatory function.
+     *
      * @return The string that you have expected.
      */
     @Override
     public String toString() {
         return this.keysToArray().toString();
-    }
-
-    // TODO Delete this testing stuff:
-    private BufferedImage paintImage;
-    private int XDIM, YDIM;
-    private Graphics2D display;
-
-    public void init_draw(int x, int y) {
-        XDIM = x;
-        YDIM = y;
-        paintImage = new BufferedImage(XDIM, YDIM, BufferedImage.TYPE_INT_RGB);
-        display = paintImage.createGraphics();
-    }
-
-    public int depth(RBNode N) // find max depth of tree
-    {
-        if (N == null)
-            return 0;
-        int l = depth(N.left);
-        int r = depth(N.right);
-        if (l > r)
-            return l + 1;
-        else
-            return r + 1;
-    }
-
-    private int bheight = 50; // branch height
-    private int yoff = 30; // static y-offset
-
-    // l is level, lb,rb are the bounds (position of left and right child)
-    private void drawnode(RBNode N, int l, int lb, int rb) {
-        if (N == null)
-            return;
-        if (N.isRed()) {
-            display.setColor(Color.red);
-
-        } else {
-            display.setColor(Color.black);
-
-        }
-        display.fillOval(((lb + rb) / 2) - 10, yoff + (l * bheight), 30, 30);
-        display.setColor(Color.BLACK);
-        display.setFont(new Font("TimesRoman", Font.PLAIN, 50));
-        display.drawString(N.key + "", ((lb + rb) / 2) + 25, yoff + 15 + (l * bheight));
-
-        display.setColor(Color.blue); // draw branches
-        if (N.left != null) {
-            display.drawLine((lb + rb) / 2, yoff + 10 + (l * bheight), ((3 * lb + rb) / 4),
-                    yoff + (l * bheight + bheight));
-            drawnode(N.left, l + 1, lb, (lb + rb) / 2);
-        }
-        if (N.right != null) {
-            display.drawLine((lb + rb) / 2, yoff + 10 + (l * bheight), ((3 * rb + lb) / 4),
-                    yoff + (l * bheight + bheight));
-            drawnode(N.right, l + 1, (lb + rb) / 2, rb);
-        }
-    }
-
-    public void drawtree() {
-        RBNode T = this.getRoot();
-        if (T == null)
-            return;
-        int d = depth(T);
-        bheight = (YDIM / d);
-        display.setColor(Color.white);
-        display.fillRect(0, 0, XDIM, YDIM); // clear background
-        drawnode(T, 0, 0, XDIM);
-
-    }
-
-    public void save(String name) throws IOException {
-        display.dispose();
-        ImageIO.write(paintImage, "PNG", new File(name + ".png"));
     }
 }
